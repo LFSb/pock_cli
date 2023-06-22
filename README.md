@@ -5,3 +5,11 @@ This is my first attempt at creating a cli using golang. The idea is simple: cal
 - Call the pocket api
 - ???
 - Profit
+
+## Configuration
+By default, the application is going to look for a yaml-formatted file `config` in the following directories:
+- `/etc/pock_cli`
+- `$HOME/.pock_cli`
+- `.` (the directory in which this README file resides)
+
+Look at the [config.example](./config.example) file for an example.

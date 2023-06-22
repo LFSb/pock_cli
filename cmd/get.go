@@ -1,12 +1,14 @@
 /*
-Copyright © 2023 Lee Beenen leebeenen@gmail.com
+Copyright © 2023 Lee Beenen <leebeenen@gmail.com>
 
 */
 package cmd
 
 import (
+	"io"
 	"fmt"
-
+	"net/http"
+	"net/url"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -23,43 +25,56 @@ var getCmd = &cobra.Command{
 	},
 }
 
+type OauthResponse struct {
+	Code string
+}
+
 func auth(consumerKey string) string {
-	fmt.Println("This is where auth will happen, someday.")
+	consumer_key := viper.Get("consumer_key").(string)
+
+	oauth_url := "https://getpocket.com/v3/oauth/request"	
+
+	params := url.Values{}
+	params.Add("consumer_key", consumer_key)
+	params.Add("redirect_uri", "pock_cli:authorizationFinished")
+
+	response, err := http.PostForm(oauth_url, params)
+
+	if err != nil { 
+		panic(fmt.Errorf("Error when retrieving oauth token: %w", err))
+	}
+
+	defer response.Body.Close()
+	body, err := io.ReadAll(response.Body)
+
+	if err != nil {
+		panic(fmt.Errorf("Error when reading oauth reponse body: %w", err))
+	}
+
+	str := string(body)
+	fmt.Printf("%s", str)
+
+	// Here, I should implement Oauth2.
+
+	// DONE:
+	// 1: Retrieve the platform consumer key
+	// 2: Obtain a request token: Sorta, I have a response body with a request token in there.
+
+	//TODO:
+	// 2b: Parse the response body and retrieve the "code" from there, as that's our request token that we need in further steps.
+	// 3: Redirect user to Pocket to continue authorization
+	// 4: Receive the callback from Pocket
+	// 5: Convert a request token into a Pocket access token
+	// 6: Make authenticated requests to pocket. For this we'll need the consumer_key from step 1, and an access token that we get from step 5. 
 
 	result := "auth_token"
 
 	return result
-
-	// Here, I should implement Oauth2.
-
-	// Step1: load the platform consumer key.
-
-	// Step 2: Obtain a request token
-
-	// Step 3: Redirect user to Pocket to continue authorization
-
-	// Step 4: Receive the callback from Pocket
-
-	// Step 5: Convert a request token into a Pocket access token
-
-	// Step 6: Make authenticated requests to pocket. For this we'll need the consumer_key from step 1, and an access token that we get from step 5. 
 }
 
 func init() {
 	rootCmd.AddCommand(getCmd)
 
-	viper.SetConfigName("config") // name of config file (without extension)
-	viper.SetConfigType("yaml") // REQUIRED if the config file does not have the extension in the name
-	viper.AddConfigPath("/etc/pock_cli/")   // path to look for the config file in
-	viper.AddConfigPath("$HOME/.pock_cli/")  // call multiple times to add many search paths
-	viper.AddConfigPath(".")               // optionally look for config in the working directory
-	err := viper.ReadInConfig() // Find and read the config file
-	if err != nil { // Handle errors reading the config file
-		panic(fmt.Errorf("fatal error config file: %w", err))
-	}
-
-	consumer_key := viper.Get("consumer_key")
-	fmt.Printf("loaded consumer_key: '%s'\n", consumer_key)
 	// Here you will define your flags and configuration settings.
 
 	// Cobra supports Persistent Flags which will work for this command

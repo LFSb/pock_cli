@@ -1,15 +1,16 @@
 /*
-Copyright © 2023 NAME HERE <EMAIL ADDRESS>
+Copyright © 2023 Lee Beenen <leebeenen@gmail.com>
 
 */
 package cmd
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
-
 
 
 // rootCmd represents the base command when called without any subcommands
@@ -41,6 +42,16 @@ func init() {
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.
 	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+
+	viper.SetConfigName("config") // name of config file (without extension)
+	viper.SetConfigType("yaml") // REQUIRED if the config file does not have the extension in the name
+	viper.AddConfigPath("/etc/pock_cli/")   // path to look for the config file in
+	viper.AddConfigPath("$HOME/.pock_cli/")  // call multiple times to add many search paths
+	viper.AddConfigPath(".")               // optionally look for config in the working directory
+	err := viper.ReadInConfig() // Find and read the config file
+
+	if err != nil { // Handle errors reading the config file
+		panic(fmt.Errorf("fatal error config file: %w", err))
+	}
+
 }
-
-
