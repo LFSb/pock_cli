@@ -29,7 +29,7 @@ type OauthResponse struct {
 	Code string
 }
 
-func get_request_token(consumerKey string) string {
+func get_request_token(consumerKey string, redirect_uri string) string {
 
 	oauth_url := "https://getpocket.com/v3/oauth/request"	
 
@@ -37,7 +37,7 @@ func get_request_token(consumerKey string) string {
 
 	bodyData := map[string]interface{}{
 		"consumer_key": consumerKey,
-		"redirect_uri": "pock_cli:authorizationFinished",
+		"redirect_uri": redirect_uri,
 	}
 
 	jsonBody, _ := json.Marshal(bodyData)	
@@ -66,17 +66,18 @@ func get_request_token(consumerKey string) string {
 		panic(fmt.Errorf("Error when decoding oauth reponse body: %w", err))
 	}
 
-	request_token := oauth_code.Code
-
-	return request_token
+	return oauth_code.Code
 }
 
 func auth(consumerKey string) string {
 	consumer_key := viper.Get("consumer_key").(string)
+	redirect_uri := viper.Get("redirect_uri").(string)
 
-	request_token := get_request_token(consumer_key)
+	request_token := get_request_token(consumer_key, redirect_uri)
 
-	fmt.Printf("request_token: %s\n", request_token)
+	auth_uri := fmt.Sprintf("https://getpocket.com/auth/authorize?request_token=%s&redirect_uri=%s", request_token, redirect_uri)
+
+	fmt.Printf("auth_uri: %s\n", auth_uri)
 
 	// Here, I should implement Oauth2.
 
