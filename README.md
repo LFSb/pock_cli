@@ -13,3 +13,6 @@ By default, the application is going to look for a yaml-formatted file `config` 
 - `.` (the directory in which this README file resides)
 
 Look at the [config.example](./config.example) file for an example.
+
+## Development
+Each of the subcommands is its own separate file in the `./cmd`. Calling them is as easy as running `go run main.go COMMAND`. So to call `get.go` you run `go run main.go get`.
